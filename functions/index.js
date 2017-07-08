@@ -6,7 +6,7 @@ const postLikePoints = 5;
 const postCommentPoints = 5;
 
 admin.initializeApp(functions.config().firebase);
-
+/*
 exports.FbPageLikeHandler = functions.database.ref('/pageLikes/{user_id}').onWrite(event => {
   if (event.data.previous.exists()) {
     return;
@@ -53,4 +53,17 @@ exports.FbPostCommentHandler = functions.database.ref('/postComment/{post_id}/{u
     }
     return score;
   });
+});
+*/
+
+exports.logUserCreation = functions.auth.user().onCreate(function(event) {
+  const d = event.data;
+  const fb_data = d.providerData.find(pd => pd.providerId === 'facebook.com');
+  admin.database().ref('users').child(d.uid).set({
+    displayName: d.displayName,
+    email: d.email,
+    photoURL: d.photoURL
+  });
+  admin.database().ref('fire2face').child(d.uid).set(fb_data.uid);
+  admin.database().ref('face2fire').child(fb_data.uid).set(d.uid);
 });
