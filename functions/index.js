@@ -61,8 +61,8 @@ exports.logUserCreation = functions.auth.user().onCreate(function(event) {
   const fb_data = d.providerData.find(pd => pd.providerId === 'facebook.com');
   admin.database().ref('users').child(d.uid).set({
     displayName: d.displayName,
-    email: d.email,
-    photoURL: d.photoURL
+    email: d.email || false,
+    photoURL: d.photoURL || false,
   });
   admin.database().ref('fire2face').child(d.uid).set(fb_data.uid);
   admin.database().ref('face2fire').child(fb_data.uid).set(d.uid);
