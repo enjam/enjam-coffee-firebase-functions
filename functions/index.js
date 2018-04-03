@@ -7,62 +7,18 @@ const postLikePoints = 5;
 const postCommentPoints = 5;
 
 admin.initializeApp(functions.config().firebase);
-/*
-exports.FbPageLikeHandler = functions.database.ref('/pageLikes/{user_id}').onWrite(event => {
-  if (event.data.previous.exists()) {
-    return;
-  }
-  const user_id = event.params.user_id;
-  var scoreRef = admin.database().ref('/scores/' + user_id);
-  scoreRef.transaction(function(score) {
-    if (score) {
-      score=score+pageLikePoints;
-    } else {
-      score=pageLikePoints;
-    }
-    return score;
-  });
-});
-
-exports.FbPostLikeHandler = functions.database.ref('/postLikes/{post_id}/{user_id}').onWrite(event => {
-  if (event.data.previous.exists()) {
-    return;
-  }
-  const user_id = event.params.user_id;
-  var scoreRef = admin.database().ref('/scores/' + user_id);
-  scoreRef.transaction(function(score) {
-    if (score) {
-      score=score+postLikePoints;
-    } else {
-      score=postLikePoints;
-    }
-    return score;
-  });
-});
-
-exports.FbPostCommentHandler = functions.database.ref('/postComment/{post_id}/{user_id}').onWrite(event => {
-  if (event.data.previous.exists()) {
-    return;
-  }
-  const user_id = event.params.user_id;
-  var scoreRef = admin.database().ref('/scores/' + user_id);
-  scoreRef.transaction(function(score) {
-    if (score) {
-      score=score+postLikePoints;
-    } else {
-      score=postLikePoints;
-    }
-    return score;
-  });
-});
-*/
 
 function handleCorrectUserPattern(user, duration){
   return admin.database().ref()
-    .child('durations').child(user)
-    .transaction(previousDuration => {
-      return previousDuration ? Math.min(previousDuration, duration) : duration;
-    });
+    .child('contestIgnoreUsers').child(user).once('value')
+    .then(snap => {
+      if (snap.val()) return;
+      return admin.database().ref()
+        .child('durations').child(user)
+        .transaction(previousDuration => {
+          return previousDuration ? Math.min(previousDuration, duration) : duration;
+        });
+    })
 }
 
 exports.adminActionHandler = functions.database.ref('adminActions/{action}').onCreate(event => {
